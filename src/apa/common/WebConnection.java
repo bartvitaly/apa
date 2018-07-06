@@ -8,8 +8,11 @@ import java.net.URL;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
 
 public class WebConnection {
+
+	final static Logger logger = Logger.getLogger(WebConnection.class);
 
 	public static InputStream getInputStream(String address) {
 		InputStream in = null;
@@ -25,7 +28,7 @@ public class WebConnection {
 
 			in = con.getInputStream();
 		} catch (Exception e) {
-			System.out.println("Failed to get input stream: " + address);
+			logger.info("Failed to get input stream: " + address);
 			e.printStackTrace();
 		}
 		return in;
@@ -46,7 +49,7 @@ public class WebConnection {
 			source = IOUtils.toString(in, "UTF-8");
 			in.close();
 		} catch (IOException e) {
-			System.out.println("Failed to get source: " + address);
+			logger.error("Failed to get source: " + address);
 			e.printStackTrace();
 		}
 		return source;
@@ -58,10 +61,10 @@ public class WebConnection {
 			InputStream in = getInputStream(address);
 			File targetFile = new File(path);
 			FileUtils.copyInputStreamToFile(in, targetFile);
-			System.out.println("File " + address + ", saved to " + path);
+			logger.info("File " + address + ", saved to " + path);
 			in.close();
 		} catch (Exception e) {
-			System.out.println("Download of file " + path + " failed.");
+			logger.error("Download of file " + path + " failed.");
 			e.printStackTrace();
 		}
 
