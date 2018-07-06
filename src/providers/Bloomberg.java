@@ -66,13 +66,15 @@ public class Bloomberg {
 		Collection<File> files = FileUtils.listFiles(new File(FOLDER), new String[] { "csv" }, false);
 
 		System.out.println("Old transactions count: " + mconnect.collection.find().into(new ArrayList<>()).size());
+
 		for (File file : files) {
 			csv = new CsvFileReader(file);
 			List<String> headers = csv.getHeaders();
 			List<List<String>> rows = csv.getValues();
+			int indexPosition = mconnect.indexPosition(headers, "TRANSACTION_ID");
 
 			for (List<String> row : rows) {
-				if (!tradeExists(mconnect.collection, row.get(transactionPlace(headers)))) {
+				if (!mconnect.tradeExists("TRANSACTION_ID", row.get(indexPosition))) {
 					Document document = new Document();
 					for (int i = 0; i < headers.size(); i++) {
 						document.append(headers.get(i), row.get(i));
@@ -83,43 +85,6 @@ public class Bloomberg {
 		}
 
 		System.out.println("New transactions count: " + mconnect.collection.find().into(new ArrayList<>()).size());
-
-	}
-
-	public static boolean tradeExists(MongoCollection<Document> collection, Object transactionId) {
-
-		if (collection.find(Filters.eq("TRANSACTION_ID", transactionId)).first() == null) {
-			System.out.println("New transaction: " + transactionId);
-			return false;
-		} else {
-			return true;
-		}
-
-	}
-
-	public static int transactionPlace(List<String> headers) throws Exception {
-
-		int i = 0;
-		for (String header : headers) {
-			if (header.equals("TRANSACTION_ID")) {
-				return i;
-			}
-			i++;
-		}
-
-		if (i == 0) {
-			throw new Exception("TRANSACTION_ID was not found");
-		}
-
-		return 0;
-	}
-
-	public static void search() {
-
-		MongoConnection mconnect = new MongoConnection();
-		mconnect.connect(DB, COLLECTION);
-		mconnect.collection.find(Filters.eq("TRANSACTION_ID", "7ee9ac3d-a952-4109-a3ae-5b88ae39d10f")).first()
-				.get("TRANSACTION_ID");
 
 	}
 
